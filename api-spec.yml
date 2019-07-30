@@ -1,0 +1,171 @@
+swagger: '2.0'
+info:
+  description: REST API for Pocket market
+  version: '1.0'
+  title: POCKET MARKET APP
+  termsOfService: Terms of service
+  contact:
+    name: Pocket market
+    url: 'https://pm.com/about/'
+    email: contact@pm.com
+  license:
+    name: Apache License Version 2.0
+    url: 'https://www.apache.org/licenses/LICENSE-2.0'
+host: 'localhost:8082'
+basePath: /
+tags:
+  - name: auth-controller
+    description: Auth Controller
+paths:
+  /user/login:
+    post:
+      tags:
+        - auth-controller
+      summary: loginHandler
+      operationId: loginHandlerUsingPOST
+      consumes:
+        - application/json
+      produces:
+        - '*/*'
+      parameters:
+        - in: body
+          name: userRequest
+          description: userRequest
+          required: true
+          schema:
+            $ref: '#/definitions/VerificationRequest'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: string
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+  /user/register:
+    post:
+      tags:
+        - auth-controller
+      summary: registrationHandler
+      operationId: registrationHandlerUsingPOST
+      consumes:
+        - application/json
+      produces:
+        - '*/*'
+      parameters:
+        - in: body
+          name: userRequest
+          description: userRequest
+          required: true
+          schema:
+            $ref: '#/definitions/ActRequest'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: string
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+  '/user/update/{id}':
+    put:
+      tags:
+        - auth-controller
+      summary: updateUser
+      operationId: updateUserUsingPUT
+      consumes:
+        - application/json
+      produces:
+        - '*/*'
+      parameters:
+        - in: body
+          name: user
+          description: user
+          required: true
+          schema:
+            $ref: '#/definitions/UserWrapper'
+        - in: body
+          name: id
+          description: id
+          required: false
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: string
+        '201':
+          description: Created
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+definitions:
+  ActRequest:
+    type: object
+    properties:
+      activation:
+        $ref: '#/definitions/JSONObject'
+      profile_required:
+        type: boolean
+      user_name:
+        type: string
+      user_type:
+        type: string
+  JSONObject:
+    type: object
+    properties:
+      empty:
+        type: boolean
+  VerificationRequest:
+    type: object
+    properties:
+      profile_required:
+        type: boolean
+      user_name:
+        type: string
+      user_type:
+        type: string
+      verification:
+        $ref: '#/definitions/JSONObject'
+  UserWrapper:
+    type: object
+    properties:
+      created_time:
+        type: string
+        format: date-time
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      mobile_no:
+        type: string
+      rating:
+        type: number
+        format: double
+      updated_time:
+        type: string
+        format: date-time
+      user_id:
+        type: integer
+        format: int64
+      user_name:
+        type: string
+      user_stts:
+        type: string
