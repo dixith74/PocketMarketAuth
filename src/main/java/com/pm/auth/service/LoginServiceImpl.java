@@ -16,7 +16,6 @@ import com.pm.auth.util.JwtTokenBuilder;
 import com.pm.auth.util.OtpGenerator;
 import com.pm.common.beans.UserWrapper;
 import com.pm.common.entities.PmUsers;
-import com.pm.common.exception.BussinessExection;
 import com.pm.common.sms.SmsSender;
 
 @Service
@@ -27,7 +26,7 @@ public class LoginServiceImpl implements LoginService{
 	
 	@Autowired
 	public InMemoryStore inMemoryStore;
-
+	
 	@Override
 	public String register(ActRequest actRequest) {
 		UserWrapper uw = validate(actRequest, "register");
@@ -125,7 +124,7 @@ public class LoginServiceImpl implements LoginService{
 		user = loginRepo.save(user);
 		return new UserWrapper(user.getUserId(), user.getFirstName(), user.getLastName(),
 				user.getEmail(), user.getMobileNo(), user.getUserName(), user.getUserStts(), user.getRating(), 
-				user.getCreatedTime(), user.getUpdatedTime());
+				user.getCreatedTime(), user.getUpdatedTime(), user.getUserAddress(), user.getImage());
 	}
 	
 	@Deprecated
@@ -140,7 +139,7 @@ public class LoginServiceImpl implements LoginService{
 	
 	private void sendSms(int otp) {
 		// TWILIO SMS Gateway
-		SmsSender.sendMessage(otp);
+		SmsSender.sendMessage(otp,"");
 	}
 
 	private JSONObject prepareResponse(String mblNum) {
@@ -151,17 +150,5 @@ public class LoginServiceImpl implements LoginService{
 		} catch (JSONException e) {
 		}
 		return obj;
-	}
-	
-	@Autowired
-	UserRepository userRepo;
-
-	@Override
-	public void update(UserWrapper user) {
-		PmUsers pmUser = userRepo.findById(user.getUserId()).orElseThrow(() -> new BussinessExection("User not found"));
-		pmUser.setFirstName(user.getFirstName());
-		pmUser.setLastName(user.getLastName());
-		pmUser.setEmail(user.getEmail());
-		userRepo.save(pmUser);
 	}
 }

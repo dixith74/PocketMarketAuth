@@ -3,4 +3,4 @@ pluginManagement {
 		gradlePluginPortal()
 	}
 }
-rootProject.name = 'pm-auth'
+rootProject.name = 'pocket-market-auth'

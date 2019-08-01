@@ -24,12 +24,13 @@ public class JwtTokenBuilder {
 	public static String createJWT(String subject, UserWrapper user){
 		
 		//The JWT signature algorithm we will be using to sign the token
-		SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.RS256;
+		//SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.RS256;
+		SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
 
 		Instant now = Instant.now();
 		
 		//We will sign our JWT with our ApiKey secret
-		byte[] apiKeySecretBytes = DatatypeConverter.parseBase64Binary("pmsecret");
+		byte[] apiKeySecretBytes = DatatypeConverter.parseBase64Binary("Hello");
 		Key signingKey = new SecretKeySpec(apiKeySecretBytes, signatureAlgorithm.getJcaName());
 
 		//Let's set the JWT Claims
