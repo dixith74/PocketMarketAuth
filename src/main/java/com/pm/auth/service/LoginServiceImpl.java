@@ -41,7 +41,7 @@ public class LoginServiceImpl implements LoginService{
 		// System.out.println(otp);
 		// sendToInMemStore(actRequest.getUserName(), otp);
 		int otp = inMemoryStore.generateOTP(actRequest.getUserName());
-		sendSms(otp);
+		//sendSms(otp, uw.getMobileNo());
 		JSONObject response = prepareResponse(uw.getMobileNo());
 		return response.toString();
 	}
@@ -137,9 +137,9 @@ public class LoginServiceImpl implements LoginService{
 		//inMemStore.put(mblNum, otp);
 	}
 	
-	private void sendSms(int otp) {
+	private void sendSms(int otp, String mbl) {
 		// TWILIO SMS Gateway
-		SmsSender.sendMessage(otp,"");
+		SmsSender.sendMessage(otp, mbl);
 	}
 
 	private JSONObject prepareResponse(String mblNum) {
