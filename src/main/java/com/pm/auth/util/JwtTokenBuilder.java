@@ -54,7 +54,7 @@ public class JwtTokenBuilder {
 				.signWith(signatureAlgorithm, signingKey);
 		return builder.compact();
 	}
-	
+/*	
 	public static void main(String[] args) {
 		UserWrapper user = new UserWrapper();
 		user.setUserId(23232);
@@ -79,4 +79,5 @@ public class JwtTokenBuilder {
             SecurityContextHolder.clearContext();
         }
 	}
+	*/
 }

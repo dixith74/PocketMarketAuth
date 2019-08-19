@@ -1,13 +1,12 @@
 package com.pm.auth.login;
 
-import javax.websocket.server.PathParam;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,11 +28,11 @@ public class UserController {
 	@Autowired
 	private UserService userService;
 	
-	@PutMapping("/update/{id}")
+	@PutMapping("/update/{userid}")
 	@ResponseStatus(code = HttpStatus.OK)
-	public ResponseEntity<String> updateUser(@RequestBody() UserWrapper user, @PathParam("id") Long id) {
+	public ResponseEntity<String> updateUser(@PathVariable("userid") Long userid, @RequestBody() UserWrapper user) {
 		LOGGER.info("Updating user {}", user);
-		user.setUserId(id);
+		user.setUserId(userid);
 		userService.update(user);
 		return ResponseEntity.ok().build();
 	}
@@ -47,11 +46,11 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 	
-	@GetMapping("/{id}")
+	@GetMapping("/{userid}")
 	@ResponseStatus(code = HttpStatus.OK)
-	public ResponseEntity<String> getUser(@PathParam("id") Long id) {
-		LOGGER.info("Updating user {}", id);
-		userService.getUser(id);
+	public ResponseEntity<String> getUser(@PathVariable("userid") Long userid) {
+		LOGGER.info("Updating user {}", userid);
+		userService.getUser(userid);
 		return ResponseEntity.ok().build();
 	}
 }
