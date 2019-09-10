@@ -16,7 +16,7 @@ spring:
         jdbc:
           lob.non_contextual_creation: true
   flyway:
-    enabled: false
+    enabled: true
     locations: classpath:db/migration
     table: schema_history_pm_auth
     baseline-on-migrate: true
@@ -25,20 +25,23 @@ spring:
     placeholders:
       schemaName: public
 server:
-  port: 8084
-    
-twilio:
-  account:
-    sid:  ajfladfla
-  auth:
-    token: tata
-    
+  port: 8082
+sms:
+  api:
+    key: NivixdwmYkU-WOVs38Wp3fJ5HeQ8VS7pIPhUHeSZ8L
+management:
+  endpoints:
+    web:
+      base-path: /    
 cloud:
   aws:
     region:
       static: eu-west-1
     stack:
       auto: false
+logging:
+  level:
+    org.springframework.security: DEBUG
 ---
 spring:
   profiles: prod

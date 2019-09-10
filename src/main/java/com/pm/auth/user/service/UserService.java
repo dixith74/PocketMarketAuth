@@ -1,4 +1,4 @@
-package com.pm.auth.service;
+package com.pm.auth.user.service;
 
 import org.springframework.web.multipart.MultipartFile;
 

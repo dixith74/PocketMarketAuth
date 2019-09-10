@@ -1,4 +1,4 @@
-package com.pm.auth.login;
+package com.pm.auth.user.endpoint;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.pm.auth.service.UserService;
+import com.pm.auth.user.service.UserService;
 import com.pm.common.beans.UserWrapper;
 
 @RestController
@@ -48,9 +48,8 @@ public class UserController {
 	
 	@GetMapping("/{userid}")
 	@ResponseStatus(code = HttpStatus.OK)
-	public ResponseEntity<String> getUser(@PathVariable("userid") Long userid) {
+	public ResponseEntity<UserWrapper> getUser(@PathVariable("userid") Long userid) {
 		LOGGER.info("Updating user {}", userid);
-		userService.getUser(userid);
-		return ResponseEntity.ok().build();
+		return ResponseEntity.ok(userService.getUser(userid));
 	}
 }

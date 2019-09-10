@@ -1,4 +1,4 @@
-package com.pm.auth.service;
+package com.pm.auth.user.service;
 
 import java.io.File;
 
@@ -6,10 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.pm.auth.aws.AmazonClientService;
-import com.pm.auth.dao.UserRepository;
+import com.pm.auth.repo.UserRepository;
+import com.pm.common.aws.AmazonClientService;
 import com.pm.common.beans.UserWrapper;
 import com.pm.common.entities.PmUsers;
 import com.pm.common.exception.BussinessExection;
@@ -23,6 +24,8 @@ public class UserServiceImpl implements UserService{
 	
 	@Autowired
 	public AmazonClientService amazonClientService;
+	
+	private static final String APP_NAME = "pocket-market";
 
 	@Override
 	public void update(UserWrapper user) {
@@ -38,11 +41,15 @@ public class UserServiceImpl implements UserService{
 		PmUsers pmUser = userRepository.findById(userId).orElseThrow(() -> new BussinessExection("User not found"));
 		File file = Utility.convertMultiPartToFile(multipartFile);
 	    String fileName = Utility.generateFileName(multipartFile);
-		amazonClientService.getS3Client().putObject(new PutObjectRequest("prodcuts",fileName, file)
-				.withCannedAcl(CannedAccessControlList.PublicRead));
-		String profilePic = amazonClientService.getS3Client().getUrl("prodcuts",fileName).toString();
-		pmUser.setImage(profilePic);
-		userRepository.save(pmUser);
+	    fileName = "assets/users/" + userId + "/" + fileName;
+	    AmazonS3 amazonS3 = amazonClientService.getS3Client();
+	    if (amazonS3.doesBucketExistV2(APP_NAME)) {
+	    	amazonS3.putObject(new PutObjectRequest(APP_NAME,fileName, file)
+	    			.withCannedAcl(CannedAccessControlList.PublicRead));
+	    	String uploadedFileUrl = amazonS3.getUrl(APP_NAME,fileName).toString();
+	    	pmUser.setImage(uploadedFileUrl);
+	    	userRepository.save(pmUser);
+	    }
 	}
 
 	@Override

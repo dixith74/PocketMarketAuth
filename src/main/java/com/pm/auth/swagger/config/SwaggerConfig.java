@@ -1,11 +1,8 @@
 package com.pm.auth.swagger.config;
 
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.google.common.base.Predicate;
@@ -19,7 +16,7 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-@Profile("!prod")
+//@Profile("!prod")
 @Configuration
 @EnableSwagger2
 public class SwaggerConfig {
@@ -51,10 +48,5 @@ public class SwaggerConfig {
         Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
         builder.propertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
         return builder;
-    }
-    
-    @Bean
-    public RestTemplate restTemplate(RestTemplateBuilder bulder) {
-    	return bulder.basicAuthentication("pm", "pm123").build();
     }
 }

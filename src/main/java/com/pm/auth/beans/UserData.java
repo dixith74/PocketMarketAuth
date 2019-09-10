@@ -4,6 +4,7 @@ public class UserData {
 
 	private String userName;
 	private String userType;
+	private String clientType;
 
 	public String getUserName() {
 		return userName;
@@ -21,4 +22,11 @@ public class UserData {
 		this.userType = userType;
 	}
 
+	public String getClientType() {
+		return clientType;
+	}
+
+	public void setClientType(String clientType) {
+		this.clientType = clientType;
+	}
 }

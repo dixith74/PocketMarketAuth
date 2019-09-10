@@ -29,12 +29,10 @@ public class JwtTokenBuilder {
 		
 	}
 
-	public static String createJWT(String subject, UserWrapper user){
+	public static String createJWT(UserWrapper user){
 		
 		//The JWT signature algorithm we will be using to sign the token
-		//SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.RS256;
 		SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
-
 		Instant now = Instant.now();
 		
 		//We will sign our JWT with our ApiKey secret
@@ -46,10 +44,11 @@ public class JwtTokenBuilder {
 				.setId(UUID.randomUUID().toString())
 				.setIssuedAt(Date.from(now))
 				.setSubject(String.valueOf(user.getUserId()))
-				.setIssuer(subject)
-				.claim("mobile", user.getMobileNo())
-				.claim("client", "mobile")
-				.claim("scopes", Arrays.asList("ROLE_SELLER", "ROLE_BUYER"))
+				.setIssuer("contact@pm.com")
+				.claim("mobile_number", user.getMobileNo())
+				.claim("user_name", user.getFirstName() + " " + user.getLastName())
+				.claim("client_type", user.getClientType())
+				.claim("user_role", Arrays.asList(user.getUserType()))
 //				.setExpiration(Date.from(now.plus(5, ChronoUnit.HOURS)))
 				.signWith(signatureAlgorithm, signingKey);
 		return builder.compact();

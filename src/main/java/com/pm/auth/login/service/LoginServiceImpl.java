@@ -1,5 +1,6 @@
-package com.pm.auth.service;
+package com.pm.auth.login.service;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -8,12 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.pm.auth.beans.ActRequest;
-import com.pm.auth.beans.JwtToken;
+import com.pm.auth.beans.PmJwt;
 import com.pm.auth.beans.VerificationRequest;
-import com.pm.auth.dao.LoginRepo;
+import com.pm.auth.repo.UserRepository;
 import com.pm.auth.util.InMemoryStore;
 import com.pm.auth.util.JwtTokenBuilder;
-import com.pm.auth.util.OtpGenerator;
+import com.pm.common.beans.ClientType;
 import com.pm.common.beans.UserWrapper;
 import com.pm.common.entities.PmUsers;
 import com.pm.common.exception.BussinessExection;
@@ -23,10 +24,13 @@ import com.pm.common.sms.SmsSender;
 public class LoginServiceImpl implements LoginService {
 
 	@Autowired
-	private LoginRepo loginRepo;
+	private UserRepository userRepo;
 
 	@Autowired
 	public InMemoryStore inMemoryStore;
+	
+	@Autowired
+	private SmsSender smsSender;
 
 	@Override
 	public Map<String, String> register(ActRequest actRequest) {
@@ -41,23 +45,25 @@ public class LoginServiceImpl implements LoginService {
 		// int otp = generateOtp();
 		// System.out.println(otp);
 		// sendToInMemStore(actRequest.getUserName(), otp);
-		int otp = inMemoryStore.generateOTP(actRequest.getUserName());
-		// sendSms(otp, uw.getMobileNo());
+		String otp = inMemoryStore.generateOTP(actRequest.getUserName());
+		sendSms(otp, uw.getMobileNo());
 		return buildMessage(uw.getMobileNo());
 	}
 
 	@Override
-	public JwtToken login(VerificationRequest userRequest) {
+	public PmJwt login(VerificationRequest userRequest) {
 
-		if (verifyOtp(userRequest, "otp_auth")) {
+		if (verifyOtp(userRequest)) {
 			UserWrapper user = null;
-			user = loginRepo.findBymobileNum(userRequest.getUserName());
-			String jwtToken = JwtTokenBuilder.createJWT("contact@pm.com", user);
-			return JwtToken.builder()
-						.type("Bearer")
+			user = userRepo.findBymobileNum(userRequest.getUserName());
+			String jwtToken = JwtTokenBuilder.createJWT(user);
+			return PmJwt.builder()
+						.tokenType("Bearer")
 						.jti(UUID.randomUUID().toString())
-						.token(jwtToken)
-						.refreshToken("12345")
+						.accessToken(jwtToken)
+						.refreshToken(UUID.randomUUID().toString())
+						.userId(user.getUserId())
+						.userType(user.getUserType())
 						.build();
 		} else {
 			throw new BussinessExection("Verification failed", 403);
@@ -71,7 +77,7 @@ public class LoginServiceImpl implements LoginService {
 			String mode = actReq.getMode();
 			if ("otp".equalsIgnoreCase(mode)) {
 				String mblNum = actReq.getUserName();
-				pmUser = loginRepo.findBymobileNum(mblNum);
+				pmUser = userRepo.findBymobileNum(mblNum);
 				/*
 				 * if (pmUser != null) { isValid = true; }
 				 */
@@ -80,25 +86,21 @@ public class LoginServiceImpl implements LoginService {
 		return pmUser;
 	}
 
-	private boolean verifyOtp(VerificationRequest verReq, String type) {
+	private boolean verifyOtp(VerificationRequest verReq) {
 		boolean isValid = false;
-		if ("otp_auth".equalsIgnoreCase(type)) {
-			String mode = null;
-			String code = null;
-			mode = verReq.getMode();
-			code = verReq.getCode();
-			if ("otp".equalsIgnoreCase(mode) && code != null) {
-				// verify OTP in redis cache
-				/*
-				 * if (inMemStore.get(verReq.getUserName()) == Integer.parseInt(code)) {
-				 * inMemStore.remove(verReq.getUserName()); isValid = true; }
-				 */
-				/*
-				 * if (inMemoryStore.getOtp(verReq.getUserName()) == Integer.parseInt(code)) {
-				 * inMemoryStore.clearOTP(verReq.getUserName()); isValid = true; }
-				 */
-				isValid = true;
-			}
+		String mode = verReq.getMode();;
+		String code = verReq.getCode();;
+		if ("otp".equalsIgnoreCase(mode) && code != null) {
+			// verify OTP in redis cache
+			/*
+			 * if (inMemStore.get(verReq.getUserName()) == Integer.parseInt(code)) {
+			 * inMemStore.remove(verReq.getUserName()); isValid = true; }
+			 */
+			/*
+			 * if (inMemoryStore.getOtp(verReq.getUserName()) == Integer.parseInt(code)) {
+			 * inMemoryStore.clearOTP(verReq.getUserName()); isValid = true; }
+			 */
+			isValid = true;
 		}
 		return isValid;
 	}
@@ -106,25 +108,21 @@ public class LoginServiceImpl implements LoginService {
 	private UserWrapper persistUser(ActRequest actReq) {
 		PmUsers user = new PmUsers();
 		user.setMobileNo(actReq.getUserName());
-		user = loginRepo.save(user);
+		user.setCreatedTime(new Date());
+		user.setUpdatedTime(new Date());
+		user.setClientType(ClientType.fromShortName(actReq.getClientType()));
+		user = userRepo.save(user);
 		return new UserWrapper(user.getUserId(), user.getFirstName(), user.getLastName(), user.getEmail(),
 				user.getMobileNo(), user.getUserName(), user.getUserStts(), user.getRating(), user.getCreatedTime(),
-				user.getUpdatedTime(), user.getUserAddress(), user.getImage());
+				user.getUpdatedTime(), user.getUserAddress(), user.getImage(), user.getUserType(), user.getClientType().name());
 	}
 
-	@Deprecated
-	private int generateOtp() {
-		return OtpGenerator.generateOtp(4);
+	private void sendSms(String otp, String mbl) {
+		smsSender.sendMessage(prepareSmsMessage(otp), mbl);
 	}
 
-	@Deprecated
-	private void sendToInMemStore(String mblNum, int otp) {
-		// inMemStore.put(mblNum, otp);
-	}
-
-	private void sendSms(int otp, String mbl) {
-		// TWILIO SMS Gateway
-		SmsSender.sendMessage(otp, mbl);
+	private String prepareSmsMessage(String otp) {
+		return otp + " is OTP for login at Pocket Market.OTPs are SECRET.DO NOT disclose to anyone.";
 	}
 
 	private Map<String, String> buildMessage(String mblNum) {

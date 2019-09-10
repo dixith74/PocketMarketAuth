@@ -1,4 +1,4 @@
-package com.pm.auth.login;
+package com.pm.auth.login.endpoint;
 
 import java.util.Map;
 
@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,9 +15,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.pm.auth.beans.ActRequest;
-import com.pm.auth.beans.JwtToken;
+import com.pm.auth.beans.PmJwt;
 import com.pm.auth.beans.VerificationRequest;
-import com.pm.auth.service.LoginService;
+import com.pm.auth.login.service.LoginService;
 
 @RestController
 @RequestMapping("user")
@@ -37,9 +38,15 @@ public class AuthController {
 	
 	@PostMapping("/login")
 	@ResponseStatus(code = HttpStatus.OK)
-	public ResponseEntity<JwtToken> loginHandler(@RequestBody() VerificationRequest userRequest) {
+	public ResponseEntity<PmJwt> loginHandler(@RequestBody() VerificationRequest userRequest) {
 		LOGGER.info("OTP auth request {}", userRequest);
-		JwtToken jwt = loginService.login(userRequest);
+		PmJwt jwt = loginService.login(userRequest);
 		return ResponseEntity.ok().body(jwt);
+	}
+	
+	@GetMapping("/ping")
+	@ResponseStatus(code = HttpStatus.OK)
+	public ResponseEntity<String> loginHandler() {
+		return ResponseEntity.ok().body("Ok");
 	}
 }
