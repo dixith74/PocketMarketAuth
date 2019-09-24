@@ -1,0 +1,1 @@
+ALTER TABLE public.pm_categories ADD COLUMN IF NOT EXISTS image character varying(500);

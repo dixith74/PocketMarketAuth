@@ -24,11 +24,16 @@ spring:
     placeholder-replacement: true
     placeholders:
       schemaName: public
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+            
 server:
   port: 8082
 sms:
   api:
-    key: NivixdwmYkU-WOVs38Wp3fJ5HeQ8VS7pIPhUHeSZ8L
+    key: NivixdwmYkU-WOVs38Wp3fJ5HeQ8VS7pIPhUHeSZ8LT
 management:
   endpoints:
     web:

@@ -17,5 +17,4 @@ public class PmJwt {
 	private String refreshToken;
 	private String jti;
 	private Long userId;
-	private String userType;
 }

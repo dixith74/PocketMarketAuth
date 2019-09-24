@@ -1,5 +1,7 @@
 package com.pm.auth.user.endpoint;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,10 +19,14 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.pm.auth.user.service.UserService;
+import com.pm.common.beans.Address;
+import com.pm.common.beans.UserAddressWrapper;
 import com.pm.common.beans.UserWrapper;
 
+import brave.propagation.TraceContext;
+
 @RestController
-@RequestMapping("user")
+@RequestMapping("users")
 public class UserController {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
@@ -28,17 +34,17 @@ public class UserController {
 	@Autowired
 	private UserService userService;
 	
-	@PutMapping("/update/{userid}")
+	@PutMapping("/{userid}")
 	@ResponseStatus(code = HttpStatus.OK)
-	public ResponseEntity<String> updateUser(@PathVariable("userid") Long userid, @RequestBody() UserWrapper user) {
+	public ResponseEntity<Void> updateUser(@PathVariable("userid") Long userid, @RequestBody() UserWrapper user) {
 		LOGGER.info("Updating user {}", user);
 		user.setUserId(userid);
 		userService.update(user);
 		return ResponseEntity.ok().build();
 	}
 	
-	@PostMapping("/upload")
-    public ResponseEntity<?> handleFileUpload(@RequestParam("file") MultipartFile file, 
+	@PostMapping("/profile/upload")
+    public ResponseEntity<Void> handleFileUpload(@RequestParam("file") MultipartFile file, 
     		@RequestParam("userId") Long userId) {
 		userService.store(file, userId);
         //URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand("122").toUri();
@@ -48,8 +54,26 @@ public class UserController {
 	
 	@GetMapping("/{userid}")
 	@ResponseStatus(code = HttpStatus.OK)
-	public ResponseEntity<UserWrapper> getUser(@PathVariable("userid") Long userid) {
-		LOGGER.info("Updating user {}", userid);
-		return ResponseEntity.ok(userService.getUser(userid));
+	public UserWrapper getUser(@PathVariable("userid") Long userid, HttpServletRequest httpServletRequest) {
+		TraceContext context = (TraceContext) httpServletRequest.getAttribute(TraceContext.class.getName());
+		LOGGER.info("Updating user {} {} {}", userid, context.traceIdString(), httpServletRequest.getHeader("Authorization"));
+		return userService.getUser(userid);
+	}
+	
+	@PostMapping("/address")
+	@ResponseStatus(value = HttpStatus.CREATED)
+	public ResponseEntity<Void> addDeliveryAddress(@RequestBody() Address adress) {
+		userService.addAddress(adress);
+		return ResponseEntity.ok().build();
+	}
+	
+	@GetMapping("/{userid}/address")
+	@ResponseStatus(code = HttpStatus.OK)
+	public UserAddressWrapper getUserWithAddress(@PathVariable("userid") Long userid) {
+		//System.out.println(SecurityContextHolder.getContext().getAuthentication().toString());
+		//System.out.println(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
+		//JwtUser usr = (JwtUser)SecurityContextHolder.getContext().getAuthentication().getDetails();
+		LOGGER.info("getUserWithAddress {}", userid);
+		return userService.getUserAddress(userid);
 	}
 }

@@ -3,6 +3,7 @@ package com.pm.auth.util;
 import java.security.Key;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -16,6 +17,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import com.pm.common.beans.JwtUser;
 import com.pm.common.beans.UserWrapper;
 
 import io.jsonwebtoken.Claims;
@@ -46,19 +48,25 @@ public class JwtTokenBuilder {
 				.setSubject(String.valueOf(user.getUserId()))
 				.setIssuer("contact@pm.com")
 				.claim("mobile_number", user.getMobileNo())
-				.claim("user_name", user.getFirstName() + " " + user.getLastName())
-				.claim("client_type", user.getClientType())
-				.claim("user_role", Arrays.asList(user.getUserType()))
+				.claim("full_name", user.getFullName())
+				.claim("email", user.getEmail())
+				.claim("user_role", Arrays.asList("ROLE_BUYER", "ROLE_SELLER"))
+				//.claim("user_type", user.getUserType())
+				//.claim("client_type", user.getClientType())
 //				.setExpiration(Date.from(now.plus(5, ChronoUnit.HOURS)))
 				.signWith(signatureAlgorithm, signingKey);
 		return builder.compact();
 	}
-/*	
+	/*
 	public static void main(String[] args) {
 		UserWrapper user = new UserWrapper();
 		user.setUserId(23232);
 		user.setMobileNo("900980980");
-		String token = createJWT("pm", user);
+		user.setFirstName("Tata");
+		user.setLastName("Oleti");
+		user.setClientType("MOBILE");
+		user.setUserType("SELLER");
+		String token = createJWT(user);
 		System.out.println(token);
 		
 		byte[] apiKeySecretBytes = DatatypeConverter.parseBase64Binary("pocketmarket");
@@ -67,11 +75,15 @@ public class JwtTokenBuilder {
                     .setSigningKey(apiKeySecretBytes)
                     .parseClaimsJws(token)
                     .getBody();
-            String username = claims.getSubject();
-            Object scopeObj = claims.get("scopes");
+        	String userId = claims.getSubject();
             @SuppressWarnings("unchecked")
-			List<String> scopes = (List<String>)scopeObj;
-            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(username, null,
+			List<String> scopes = (ArrayList<String>)claims.get("user_role");
+            String mobileNumber = (String)claims.get("mobile_number");
+            String clientType = (String)claims.get("client_type");
+            String userName = (String)claims.get("user_name");
+            JwtUser jwtUser = new JwtUser(userId, mobileNumber, clientType, userName);
+            System.out.println(jwtUser.toString());
+            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(jwtUser, null,
             		scopes.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()));
             SecurityContextHolder.getContext().setAuthentication(auth);
         } catch (Exception ignore) {
@@ -79,4 +91,5 @@ public class JwtTokenBuilder {
         }
 	}
 	*/
+	
 }

@@ -1,0 +1,1 @@
+ALTER TABLE public.pm_address ADD COLUMN IF NOT EXISTS addr_type character varying(20);

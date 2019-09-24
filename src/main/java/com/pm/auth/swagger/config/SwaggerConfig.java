@@ -21,7 +21,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableSwagger2
 public class SwaggerConfig {
 
-	private static final String API_PKG = "com.pm.auth.login";
+	private static final String API_PKG = "com.pm.auth";
     private static final Predicate<String> PATH_SELECTOR = PathSelectors.any();
     private static final Predicate<RequestHandler> HANDLER = RequestHandlerSelectors.basePackage(API_PKG);
     private static final DocumentationType DOC_TYPE = DocumentationType.SWAGGER_2;
