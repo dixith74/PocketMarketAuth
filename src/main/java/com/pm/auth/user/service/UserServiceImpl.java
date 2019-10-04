@@ -77,13 +77,19 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public void addAddress(Address address) {
+		String addrType = address.getAddressTypeId() == 0 ? "Home" : "Work";
+		PmAddress addresses = addressRepository.findByPmUsers_UserIdAndAddressType(address.getUserId(), addrType);
+		if (addresses != null) {
+			throw new BussinessExection(addrType+ " address is already exist", 409);
+		}
 		PmAddress pmAddress = PmAddress.builder()
 				.pmUsers(userRepository.findById(address.getUserId())
-						.orElseThrow(() -> new BussinessExection("User not found")))
-				.firstName(address.getFirstName()).lastName(address.getLastName()).city(address.getCity())
+						.orElseThrow(() -> new BussinessExection("User not found", 404)))
+				.fullName(address.getFullName()).city(address.getCity())
 				.state(address.getState()).street(address.getStreet()).country(address.getCountry())
 				.addressOne(address.getAddressOne()).addressTwo(address.getAddressTwo()).pincode(address.getPincode())
-				.addressType(address.getAddressType()).build();
+				.addressType(addrType).isBilling(false).isShipping(false).status(true)
+				.createdTime(new Date()).build();
 		addressRepository.save(pmAddress);
 	}
 
@@ -96,10 +102,11 @@ public class UserServiceImpl implements UserService {
 				.userStts(user.getUserStts()).build();
 		List<Address> addrList = user.getPmUserAddress().stream()
 				.map(addr -> Address.builder().addressId(addr.getAddressId()).userId(user.getUserId())
-						.firstName(addr.getFirstName()).lastName(addr.getLastName()).addressOne(addr.getAddressOne())
-						.addressTwo(addr.getAddressTwo()).addressType(addr.getAddressType()).state(addr.getState())
+						.fullName(addr.getFullName()).addressOne(addr.getAddressOne())
+						.addressTwo(addr.getAddressTwo()).addressType(addr.getAddressType())
+						.addressTypeId("Home".equalsIgnoreCase(addr.getAddressType()) ? 0L: 1L).state(addr.getState())
 						.street(addr.getStreet()).city(addr.getCity()).country(addr.getCountry())
-						.pincode(addr.getPincode()).build())
+						.pincode(addr.getPincode()).isBilling(addr.getIsBilling()).isShipping(addr.getIsShipping()).build())
 				.collect(Collectors.toList());
 		usrWrpr.setAddresses(addrList);
 		return usrWrpr;

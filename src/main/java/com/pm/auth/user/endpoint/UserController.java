@@ -43,9 +43,9 @@ public class UserController {
 		return ResponseEntity.ok().build();
 	}
 	
-	@PostMapping("/profile/upload")
-    public ResponseEntity<Void> handleFileUpload(@RequestParam("file") MultipartFile file, 
-    		@RequestParam("userId") Long userId) {
+	@PostMapping("/{userId}/upload")
+    public ResponseEntity<Void> uploadUserImage(@RequestParam("file") MultipartFile file, 
+    		@PathVariable("userId") Long userId) {
 		userService.store(file, userId);
         //URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand("122").toUri();
         //ResponseEntity.created(ServletUriComponentsBuilder.fromCurrentContextPath().path("/downloadFile/").path("123").build().toUri());

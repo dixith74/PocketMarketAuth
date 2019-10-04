@@ -21,9 +21,9 @@ import com.pm.auth.login.service.LoginService;
 
 @RestController
 @RequestMapping("user")
-public class AuthController {
+public class AuthenticationController {
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(AuthController.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationController.class);
 	
 	@Autowired
 	private LoginService loginService;
